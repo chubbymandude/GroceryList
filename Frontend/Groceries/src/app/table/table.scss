@@ -1,0 +1,107 @@
+
+.top-div
+{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+.input-box
+{
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    transform: translate(30px, -70px);
+    width: 1000px;
+    height: 40px;
+    z-index: 3;
+    border-radius: 20px;
+    border-color: rgb(192, 192, 192);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    float: left;
+}
+.header-button
+{
+    position: relative;
+    transform: translate(40px, -80px);
+    margin-left: 25px;
+    margin-top: 6px;
+    border-radius: 20px;
+    background-color: rgb(255, 182, 145);
+    color: rgb(245, 2, 2);
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 25px;
+    width: 300px;
+    height: 50px;
+    transition: 0.2s;
+}
+.table-div
+{
+    transform: translateY(-60px);
+    margin-top: 3px;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    max-width: fit-content;
+    margin-inline: auto;
+    z-index: 1;
+}
+.groceries-table
+{
+    border: "1";
+    border-collapse: collapse; 
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+th, td, .table-input
+{
+    padding: 8px 12px;  
+    border: 1px solid #bb6700;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgb(255, 211, 158);
+    color: rgb(244, 114, 0);
+    cursor: pointer;
+}
+.table-input // additional styles for table-input
+{
+    border: none;
+    font-size: 20px;
+}
+.header-button:hover
+{
+    cursor: pointer;
+    background-color: rgb(126, 0, 0);
+    transition: 0.2s;
+}
+.table-button
+{
+    margin-left: 12px;
+    margin-top: 3px;
+    border-radius: 10px;
+    background-color: rgb(255, 182, 145);
+    color: rgb(245, 2, 2);
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 25px;
+    width: 125px;
+    height: 50px;
+    transition: 0.2s;
+}
+.table-button:hover
+{
+    cursor: pointer;
+    background-color: rgb(126, 0, 0);
+    transition: 0.2s;
+}
+.deferred-table-text
+{
+    text-align: center;
+    justify-content: center;
+    transform: translateY(-60px);
+    font-size: 40px;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgb(222, 63, 0);
+}

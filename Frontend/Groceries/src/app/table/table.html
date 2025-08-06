@@ -1,0 +1,65 @@
+@defer
+{
+    <!-- input box for adding new groceries to the list -->
+    <div class = "top-div">
+        <input id = "input" class = "input-box" placeholder = "Insert grocery item here." [(ngModel)] = "input">
+        <button (click) = "addGrocery()" class = "header-button">ADD NEW ITEM</button>
+    </div>  
+    <div class = "table-div">
+        <!-- generate a table which consists of the content from the database -->
+        <table class = "groceries-table">
+            <thead class = "table-header"> 
+                <tr>
+                    @for(col of header; track col)
+                    {
+                        <th>
+                            <!-- modify price column to indicate it is in dollars -->
+                            @if(col === "price")
+                            {
+                                {{col}}($)
+                            }
+                            @else
+                            {
+                                {{col}}
+                            }
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for(row of table; track row.rowIndex)
+                {
+                    <tr>
+                        @for(key of row.rowContents; track $index)
+                        {   
+                            <td>
+                                <!-- all columns except item name can be modified -->
+                                @if(header[$index] !== "item_name")
+                                {
+                                    <input class = 'table-input' value = {{key}}
+                                    [(ngModel)] = "row.rowContents[$index]">
+                                }
+                                @else 
+                                { 
+                                    <input class = 'table-input' value = {{key}} readonly>
+                                }
+                            </td>
+                        }
+                        <button (click) = "updateGrocery(row.rowContents)" 
+                                class = "table-button">UPDATE</button>
+                        <button (click) = "deleteGrocery(row.rowContents[0])" 
+                                class = "table-button">DELETE</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@loading(minimum 0.5s)
+{
+    <p class = "deferred-table-text">LOADING GROCERIES</p>
+}
+@error 
+{
+    <p class = "deferred-table-text">FAILED TO LOAD GROCERIES</p>
+}
