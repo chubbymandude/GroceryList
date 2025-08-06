@@ -1,0 +1,9 @@
+item_name,price,quantity,on_sale
+Apples,0.78,4,FALSE
+Bananas,0.87,5,FALSE
+Bread,1.02,10,FALSE
+Pancakes,1.44,3,FALSE
+Ice Cream,1.21,3,TRUE
+Fresh Chicken,4.03,4,FALSE
+Fish,3.45,3,TRUE
+KitKat,0.34,10,FALSE
