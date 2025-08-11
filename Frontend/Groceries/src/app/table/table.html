@@ -8,47 +8,50 @@
     <div class = "table-div">
         <!-- generate a table which consists of the content from the database -->
         <table class = "groceries-table">
-            <thead class = "table-header"> 
-                <tr>
-                    @for(col of header; track col)
-                    {
-                        <th>
-                            <!-- modify price column to indicate it is in dollars -->
-                            @if(col === "price")
-                            {
-                                {{col}}($)
-                            }
-                            @else
-                            {
-                                {{col}}
-                            }
-                        </th>
-                    }
-                </tr>
-            </thead>
+            @if(groceries.length > 0)
+            {
+                <thead class = "table-header"> 
+                    <tr>
+                        <th>Item</th>
+                        <th>Price($)</th>
+                        <th>Quantity</th>
+                        <th>On Sale</th>
+                    </tr>
+                </thead>
+            }
             <tbody>
-                @for(row of table; track row.rowIndex)
+                @for(row of groceries; track row.item_name)
                 {
                     <tr>
-                        @for(key of row.rowContents; track $index)
-                        {   
-                            <td>
-                                <!-- all columns except item name can be modified -->
-                                @if(header[$index] !== "item_name")
-                                {
-                                    <input class = 'table-input' value = {{key}}
-                                    [(ngModel)] = "row.rowContents[$index]">
-                                }
-                                @else 
-                                { 
-                                    <input class = 'table-input' value = {{key}} readonly>
-                                }
-                            </td>
-                        }
-                        <button (click) = "updateGrocery(row.rowContents)" 
-                                class = "table-button">UPDATE</button>
-                        <button (click) = "deleteGrocery(row.rowContents[0])" 
-                                class = "table-button">DELETE</button>
+                        <th>
+                            <input class = "table-input" value = {{row.item_name}} readonly>
+                        </th>
+                        <th>
+                            <!-- price allows decimal values, increment by 0.01 -->
+                            <!-- only allows numerical values AND decimal point -->
+                            <input class = "table-input" type = "number" value = "row.price" 
+                            step = "0.01" min = "0.0" max = "999.9" maxlength = "6" 
+                            [(ngModel)] = "row.price" (ngModelChange) = "updateValue(row)"
+                            (keydown) = "onKeyDown($event)" (paste) = "onPaste($event)" (input) = "onInput($event)">
+                        </th>
+                        <th>
+                            <!-- quantity allows decimal values, increment by 1 -->
+                            <!-- note that any decimal values get converted to integers -->
+                            <!-- only allows numerical values AND decimal point -->
+                            <input class = "table-input" value = "row.quantity" type = "number" min = "0" max = "1000"
+                            [(ngModel)] = "row.quantity" (ngModelChange) = "updateValue(row)"
+                            (keydown) = "onKeyDown($event)" (paste) = "onPaste($event)" (input) = "onInput($event)">
+                        </th>
+                        <th>
+                            <!-- consists of a dropdown that can update the groceries array -->
+                            <select class = "table-input" 
+                            [(ngModel)] = "row.on_sale" (ngModelChange) = "updateOnSale(row, $event)">
+                                <option [ngValue] = "true">TRUE</option>
+                                <option [ngValue] = "false">FALSE</option>
+                            </select>
+                        </th>
+                        <!-- deletes the row off the display table and the database table -->
+                        <button (click) = "deleteGrocery(row.item_name)" class = "table-button">DELETE</button>
                     </tr>
                 }
             </tbody>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Grocery } from '../services/grocery';
+import { Grocery, GroceryAPI } from '../services/grocery';
 import { FormsModule } from '@angular/forms';
 
 // representation of a row of the groceries tbale
@@ -20,18 +20,12 @@ interface TableRow
 // code needed to form table from database contents
 export class Table implements OnInit
 {
-    // variables representing table information
-    header: string[] = [];
-    groceries: string[][] = [];
-    table: TableRow[] = [];
-
+    // consists of row data for each grocery item
+    groceries: Grocery[] = [];
     // variable for input
     input: string = '';
 
-    // variable for tracking # of groceries for proper row display
-    rowCount = 0;
-
-    constructor(private service : Grocery){};
+    constructor(private service : GroceryAPI){};
 
     // initializes table information such as header and grocery data
     ngOnInit(): void
@@ -42,32 +36,14 @@ export class Table implements OnInit
     // also performs updates on the table whenever "add", "delete" or "update" buttons are clicked
     displayTable() : void
     {
-        this.service.getHeader().subscribe(
-        {
-            next : header => { this.header = header },
-        });
         this.service.getGroceries().subscribe(
         {
-            next : groceries =>
-            { 
-                this.groceries = groceries; 
-                this.service.getNumGroceries().subscribe(
-                {
-                    next: (numGroceries : number) => 
-                    { 
-                        this.rowCount = numGroceries;
-                        for(let row = 0; row < this.rowCount; row++)
-                        {
-                            this.table[row] = {rowIndex : row, rowContents : this.groceries[row]};
-                        }
-                    },
-                });
-            },
+            next: (groceries) => (this.groceries = groceries),
         });
     }
 
     // checks if a grocery item is in the groceries array
-    // then adds the grocery to the database
+    // adds the grocery to the database, updates display
     addGrocery() : boolean
     {
         // do not allow empty input
@@ -77,61 +53,74 @@ export class Table implements OnInit
             this.input = '';
             return false;
         }
-        // loop through and check that the grocery is not already in the list
-        for(let row = 0; row < this.rowCount; row++)
+        for(let row = 0; row < this.groceries.length; row++)
         {
-            if(this.groceries[row][0].toLowerCase() === this.input.toLowerCase().trim())
+            if(this.groceries[row].item_name.toLowerCase().trim() == this.input.toLowerCase().trim())
             {
-                alert(this.input.trim() + " is already on your grocery list");
+                alert("This item is already in your grocery list!");
                 this.input = '';
                 return false;
-            }   
+            }
         }
-        this.service.addGrocery(this.input).subscribe(
+        this.service.addGrocery(this.input).subscribe();
+        this.groceries.push(
         {
-            next: () => { this.displayTable(); },
+            item_name: this.input, 
+            price: 0.0, 
+            quantity: 0, 
+            on_sale: false,
         });
         this.input = ''; 
-        location.reload();
         return true;
     }
 
     // deletes from the grocery list the specified item
+    // for display purposes removes from the grocery list the row with the specified item name
     deleteGrocery(itemName : string) : void
     {
-        this.service.deleteGrocery(itemName).subscribe(
-        {
-            next: () => { this.displayTable(); },
-        });
-        location.reload();
+        this.service.deleteGrocery(itemName).subscribe();
+        const itemIndex = this.groceries.findIndex(grocery => grocery.item_name === itemName)
+        this.groceries.splice(itemIndex, 1);
     }
 
-    // updates entire row of this grocery item based on user input
-    // returns false if user input was invalid
-    updateGrocery(row : string[]) : boolean
+    // updates the given row of the database when the user updates the price or quantity attributes
+    updateValue(row : Grocery)
     {
-        // validate update
-        if(parseFloat(row[1]) < 0.0 || parseFloat(row[1]) > 999.9) // prices
+        this.service.updateGrocery(row).subscribe();
+    }
+
+    // updates the given row of the database when the user updates the "on sale" attribute
+    updateOnSale(row : Grocery, updatedValue : boolean) : void
+    {
+        row.on_sale = updatedValue;
+        this.service.updateGrocery(row).subscribe();
+    }
+
+    // helper method, prevent invalid characters on key down
+    // used for preventing invalid input in columns price & quantity
+    onKeyDown(event: KeyboardEvent) 
+    {
+        if(['e', 'E', '+', '-'].includes(event.key)) 
         {
-            alert("Prices have to be non-negative and below $1,000.");
-            return false;
+            event.preventDefault();
         }
-        else if(parseInt(row[2]) < 0) // quantities
+    }
+
+    // helper method, prevent invalid characters on paste
+    // used for preventing invalid input in columns price & quantity
+    onPaste(event: ClipboardEvent) 
+    {
+        if(/[eE+\-]/.test(event.clipboardData?.getData('text') || '' ))
         {
-            alert("Quantity of items must be 0 or above.");
-            return false;
+            event.preventDefault();
         }
-        else if(row[3].toLowerCase().trim() !== "false" && row[3].toLowerCase().trim() !== "true")
-        { // on_sale
-            alert("Must insert either TRUE or FALSE for sales.");
-            return false;
-        }
-        // perform update
-        this.service.updateGrocery(row).subscribe(
-        {
-            next: () => { this.displayTable() },
-        });
-        location.reload();
-        return true;
+    }
+
+    // helper method, prevent invalid characters on input
+    // used for preventing invalid input in columns price & quantity
+    onInput(event: Event) 
+    {
+        const input = event.target as HTMLInputElement;
+        input.value = input.value.replace(/[eE+\-]/g, '');
     }
 }

@@ -8,24 +8,32 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 // class connects to database via JDBC to obtain grocery list and associated items
 @Service
 public class GroceryList 
 {
+	// an inner class that represents components of the JSON body for an individual Grocery item
+	public record Grocery(String item_name, Float price, Integer quantity, Boolean on_sale) { }
+	
 	// database information
 	private static final String URL = System.getenv("DB_URL");
 	private static final String USERNAME = System.getenv("DB_USERNAME");
 	private static final String PASSWORD = System.getenv("DB_PASSWORD");
 	
 	// queries
-	private static final String SELECT_ALL = "SELECT * FROM groceries;";
-	private static final String ROW_COUNT = "SELECT COUNT(1) FROM groceries;";
+	private static final String SELECT_ALL = 
+		"SELECT item_name, price, quantity, on_sale\n" + 
+		"FROM groceries\n" +
+		"ORDER BY id";
 	private static final String INSERT_ROW = 
 		"INSERT INTO groceries (item_name, price, quantity, on_sale)\n" +
 		"VALUES (?, 0.0, 0, false);";
-	private static final String DELETE_ROW = "DELETE FROM groceries\n" + "WHERE item_name = ?;";
+	private static final String DELETE_ROW = "DELETE FROM groceries\n" + "WHERE item_name = ?";
 	private static final String UPDATE_ROW = 
 		"UPDATE groceries\n" +
 		"SET price = ?, quantity = ?, on_sale = ?\n" +
@@ -34,7 +42,6 @@ public class GroceryList
 	
 	private Connection connection; // develop connection to database
 	public ArrayList<String> columns; // names of each column 
-	private int numGroceries; // use a query to determine this
 	
 	// initiailization block used to develop connection for this user
 	{
@@ -48,83 +55,49 @@ public class GroceryList
 	// initializes groceries and the # of groceries for this user
 	public GroceryList()
 	{
-		numGroceries = getNumGroceries();
 		columns = new ArrayList<>();
 		getColumns();
 	}
 	
-	// obtains # of rows in the groceries table AKA the # of groceries there are
-	public int getNumGroceries() 
-	{
-		try
-		{
-			PreparedStatement getCount = connection.prepareStatement(ROW_COUNT);
-			ResultSet resultSet = getCount.executeQuery();
-			
-			if(resultSet.next())
-			{
-				return resultSet.getInt("count");
-			}
-		}
-		catch(SQLException e) { e.printStackTrace(); }
-		// if an error occurred
-		return 0;
-	}
-	
 	// obtains columns associated with the grocery table, returns true if successful
-	public boolean getColumns()
+	private void getColumns()
 	{
 		try
 		{
 			PreparedStatement selectAll = connection.prepareStatement(SELECT_ALL);
 			ResultSet resultSet = selectAll.executeQuery();
+			
 			ResultSetMetaData metaData = resultSet.getMetaData();	
 			int numColumns = metaData.getColumnCount();
-			
 			for(int col = 1; col <= numColumns; col++)
 			{
 				columns.add(metaData.getColumnName(col));
 			}
-			
-			return true;
 		}
 		catch(SQLException e) { e.printStackTrace(); }
-		// if an error occurred while preparing statement
-		return false;
 	}
 	
-	// used to get all groceries and their information from database	
-	// returns false if the database was not able to be contacted
-	public String[][] getGroceries()
+	// used to get all groceries and their information from database
+	// returned as a List of Maps (which are rows) to convert to JSON later
+	public List<LinkedHashMap<String, Object>> getGroceries()
 	{
 		try
 		{
 			PreparedStatement selectAll = connection.prepareStatement(SELECT_ALL);
 			ResultSet resultSet = selectAll.executeQuery();
-			String[][] groceries = new String[numGroceries][columns.size()];
+			List<LinkedHashMap<String, Object>> rows = new ArrayList<>();
 			
-			// loop through each item and obtain results accordingly
-			int row = 0;
-			while(resultSet.next())
+			// create a JSON array out of the database contents
+			while(resultSet.next()) 
 			{
+				LinkedHashMap<String, Object> currRow = new LinkedHashMap<String, Object>();
 				for(int col = 0; col < columns.size(); col++)
 				{
-					groceries[row][col] = resultSet.getString(col + 1);
-					// check boolean and convert it
-					if(groceries[row][col].equals("t"))
-					{
-						groceries[row][col] = "TRUE";
-					}
-					if(groceries[row][col].equals("f"))
-					{
-						groceries[row][col] = "FALSE";
-					}
+					currRow.put(columns.get(col), resultSet.getObject(col + 1)); 
 				}
-				row++;
+				rows.add(currRow);
 			}
-			
-			// success
-			return groceries;
+			return rows;
 		}
 		catch(SQLException e) { e.printStackTrace(); } 
 		// if an error occurred while preparing statement
@@ -134,22 +107,19 @@ public class GroceryList
 	// adds row with specified grocery into the database (with default values for the other data)
 	public void addGrocery(String grocery)
 	{
-		try
+		try(PreparedStatement insert = connection.prepareStatement(INSERT_ROW);)
 		{
-			PreparedStatement insert = connection.prepareStatement(INSERT_ROW);
 			insert.setString(1, grocery);
 			insert.execute();
-			numGroceries++;
 		}
 		catch(SQLException e) { e.printStackTrace(); }
 	}
 	
 	// deletes row consisting of specified grocery item
 	public void deleteGrocery(String grocery)
-	{
-		try
+	{ 
+		try(PreparedStatement delete = connection.prepareStatement(DELETE_ROW);)
 		{
-			PreparedStatement delete = connection.prepareStatement(DELETE_ROW);
 			delete.setString(1, grocery);
 			delete.execute();
 		}
@@ -157,16 +127,15 @@ public class GroceryList
 	}
 	
 	// updates an item in the grocery 
-	public void updateGrocery(String[] groceryData)
+	public void updateGrocery(Grocery groceryData)
 	{
-		try
+		try(PreparedStatement update = connection.prepareStatement(UPDATE_ROW))
 		{
-			PreparedStatement update = connection.prepareStatement(UPDATE_ROW);
 			// set based on data type (only place requiring hardcoding)
-			update.setFloat(1, Float.valueOf(groceryData[1]));
-			update.setInt(2, Integer.valueOf(groceryData[2]));
-			update.setBoolean(3,  Boolean.valueOf(groceryData[3]));
-			update.setString(4, groceryData[0]);
+			update.setFloat(1, groceryData.price());
+			update.setInt(2, groceryData.quantity());
+			update.setBoolean(3, groceryData.on_sale());
+			update.setString(4, groceryData.item_name());
 			update.execute();
 		}
 		catch(SQLException e) { e.printStackTrace(); }
