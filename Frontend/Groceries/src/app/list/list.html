@@ -1,0 +1,54 @@
+@defer
+{
+    @if(showMessage)
+    {
+        <p class = "success-message">{{message}}</p>
+    }
+    <div class = "table-div">
+        <table class = "groceries-table">
+            @if(items.length > 0)
+            {
+                <thead class = "table-header"> 
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>On Sale</th>
+                    </tr>
+                </thead>
+            }
+            @else
+            {
+                <p class = "deferred-table-text">THERE IS NOTHING IN YOUR GROCERY LIST!</p>
+            }
+            <tbody>
+                @for(row of items; track row.item_name)
+                {
+                    <tr>
+                        <th>{{row.item_name}}</th>
+                        <th>${{row.price}}</th>
+                        <th>{{row.quantity}}</th>
+                        <th>
+                            @if(row.on_sale == true) { YES }
+                            @else { NO }
+                        </th>
+                        <button (click) = "removeFromList(row)" class = "table-button">REMOVE</button>
+                        <button (click) = "purchaseItem(row)" class = "table-button">PURCHASE</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@placeholder(minimum 0.5s)
+{
+    <p class = "deferred-table-text">LOADING GROCERY LIST</p>
+}
+@loading(minimum 0.5s)
+{
+    <p class = "deferred-table-text">LOADING GROCERY LIST</p>
+}
+@error 
+{
+    <p class = "deferred-table-text">FAILED TO LOAD YOUR GROCERY LIST</p>
+}

@@ -1,0 +1,75 @@
+
+.success-message
+{
+    text-align: center;
+    justify-content: center;
+    transform: translateY(15px);
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgb(222, 63, 0);
+}
+.table-div
+{
+    margin-top: 50px;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    place-items: center;
+    text-align: center;
+    max-width: fit-content;
+    margin-inline: auto;
+    z-index: 1;
+}
+.groceries-table
+{
+    border: "1";
+    border-collapse: collapse; 
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+th, td, input
+{
+    padding: 8px 12px;  
+    border: 1px solid #bb6700;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgb(255, 211, 158);
+    color: rgb(244, 114, 0);
+    width: 200px;
+    height: 50px;
+}
+.table-input
+{
+    border: none;
+    font: inherit;
+}
+.table-button
+{
+    margin-left: 30px;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: rgb(255, 182, 145);
+    color: rgb(245, 2, 2);
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 25px;
+    width: 150px;
+    height: 40px;
+    transition: 0.2s;
+}
+.table-button:hover
+{
+    cursor: pointer;
+    background-color: rgb(126, 0, 0);
+    transition: 0.2s;
+}
+.deferred-table-text
+{
+    text-align: center;
+    justify-content: center;
+    font-size: 40px;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgb(222, 63, 0);
+}

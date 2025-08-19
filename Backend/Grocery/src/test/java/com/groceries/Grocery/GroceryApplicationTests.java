@@ -3,17 +3,13 @@ package com.groceries.Grocery;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import groceries.GroceryApplication;
-import groceries.GroceryList;
+import application.Grocery;
+import application.GroceryApplication;
+import application.grocerylist.GroceryList;
+import application.store.Store;
 
 @SpringBootTest(classes = GroceryApplication.class)
 class GroceryApplicationTests 
@@ -32,12 +28,11 @@ class GroceryApplicationTests
 		assertEquals("on_sale", columns.get(3));
 	}
 	
-	// tests the output of the JSON string as a result of the getGroceries method
 	@Test
-	void testJSONString() throws JsonProcessingException
+	void testStoreUpdate()
 	{
-		GroceryList list = new GroceryList();
-		List<LinkedHashMap<String, Object>> map = list.getGroceries();
-		System.out.println(new ObjectMapper().writeValueAsString(map));
-	}	
+		Store store = new Store();
+		Grocery grocery = new Grocery("Apples", Float.valueOf("0.78"), 4, false);
+		store.addItem(grocery); // increment by 1
+	}
 }

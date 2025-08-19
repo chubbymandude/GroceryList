@@ -1,19 +1,47 @@
 .header-div 
 {
-    text-align: center;
-    justify-content: center;
-}
-.shopping-cart-image
-{
-    width: 250px;
-    height: 250px;
-    margin: 0;
+    text-align: left;
+    justify-content: flex-start;
+    display: flex;
+    align-items: center;
+    border-style: solid;
+    border-color: orange;
+    border-width: 2px;
+    background: linear-gradient(to right, rgb(255, 192, 75), #ff9d00);
+    width: 1510px;
+    height: 120px;
     padding: 0;
+    margin: 0;
 }
 .header-text
 {
-    color: rgb(24, 24, 24);
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 40px;
-    transform: translateY(-45px);
+    color: #e05d00;
+    font-weight: 500;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 50px;
+    margin-left: 60px;
+    margin-right: 40px;
+}
+.buttons-div
+{
+    transform: translateX(100px);
+}
+.header-button
+{
+    color: #e05d00;
+    background-color: transparent;
+    font-weight: 500;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 30px;
+    text-align: center;
+    justify-content: center;
+    margin-left: 40px;
+    border: none;
+    transition: 0.2s;
+}
+.header-button:hover
+{
+    transition: 0.2s;
+    cursor: pointer;
+    color: #ac4800;
 }

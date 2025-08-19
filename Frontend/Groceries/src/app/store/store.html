@@ -1,0 +1,51 @@
+@defer
+{
+    @if(showMessage)
+    {
+        <p class = "success-message">{{message}}</p>
+    }
+    <div class = "table-div">
+        <table class = "table">
+            @if(items.length > 0)
+            {
+                <thead class = "table-header"> 
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>On Sale</th>
+                    </tr>
+                </thead>
+            }
+            <tbody>
+                @for(row of items; track row.item_name)
+                {
+                    <tr>
+                        <th>{{row.item_name}}</th>
+                        <th>${{row.price}}</th>
+                        <th>
+                            <input [(ngModel)] = "row.quantity" class = "table-input" type = "number" readonly/>
+                        </th>
+                        <th>
+                            @if(row.on_sale == true) { YES }
+                            @else { NO }
+                        </th>
+                        <button (click) = "addToList(row)" class = "table-button">ADD</button>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@placeholder(minimum 0.5s)
+{
+    <p class = "deferred-table-text">LOADING STORE</p>
+}
+@loading(minimum 0.5s)
+{
+    <p class = "deferred-table-text">LOADING STORE</p>
+}
+@error 
+{
+    <p class = "deferred-table-text">FAILED TO LOAD STORE</p>
+}

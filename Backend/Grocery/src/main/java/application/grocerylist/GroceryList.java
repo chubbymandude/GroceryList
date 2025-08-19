@@ -1,4 +1,4 @@
-package groceries;
+package application.grocerylist;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,13 +13,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-// class connects to database via JDBC to obtain grocery list and associated items
+import application.Grocery;
+
+// handles logic revolving around the grocery list route of the Grocery's website
 @Service
 public class GroceryList 
 {
-	// an inner class that represents components of the JSON body for an individual Grocery item
-	public record Grocery(String item_name, Float price, Integer quantity, Boolean on_sale) { }
-	
 	// database information
 	private static final String URL = System.getenv("DB_URL");
 	private static final String USERNAME = System.getenv("DB_USERNAME");
@@ -30,44 +29,37 @@ public class GroceryList
 		"SELECT item_name, price, quantity, on_sale\n" + 
 		"FROM groceries\n" +
 		"ORDER BY id";
-	private static final String INSERT_ROW = 
-		"INSERT INTO groceries (item_name, price, quantity, on_sale)\n" +
-		"VALUES (?, 0.0, 0, false);";
-	private static final String DELETE_ROW = "DELETE FROM groceries\n" + "WHERE item_name = ?";
-	private static final String UPDATE_ROW = 
-		"UPDATE groceries\n" +
-		"SET price = ?, quantity = ?, on_sale = ?\n" +
+	private static final String DELETE_ROW = 
+		"DELETE FROM groceries\n" +
 		"WHERE item_name = ?";
-	;
+	private static final String MOVE_ITEM_TO_STORE = 
+		"UPDATE store\n" +
+		"SET quantity = quantity + ?\n" +
+		"WHERE item_name = ?";
 	
-	private Connection connection; // develop connection to database
-	public ArrayList<String> columns; // names of each column 
+	private Connection connection; 
+	public ArrayList<String> columns;
 	
-	// initiailization block used to develop connection for this user
 	{
-		try
-		{
-			connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-		}
+		try { connection = DriverManager.getConnection(URL, USERNAME, PASSWORD); }
 		catch(SQLException e) { e.printStackTrace(); }
 	}
 	
-	// initializes groceries and the # of groceries for this user
 	public GroceryList()
 	{
 		columns = new ArrayList<>();
 		getColumns();
 	}
 	
-	// obtains columns associated with the grocery table, returns true if successful
+	// obtains columns associated with the grocery table
 	private void getColumns()
 	{
 		try
 		{
 			PreparedStatement selectAll = connection.prepareStatement(SELECT_ALL);
 			ResultSet resultSet = selectAll.executeQuery();
-			
 			ResultSetMetaData metaData = resultSet.getMetaData();	
+			
 			int numColumns = metaData.getColumnCount();
 			for(int col = 1; col <= numColumns; col++)
 			{
@@ -104,39 +96,35 @@ public class GroceryList
 		return null;
 	}
 	
-	// adds row with specified grocery into the database (with default values for the other data)
-	public void addGrocery(String grocery)
+	// removes the specified grocery from the grocery list
+	// updates the store to reclaim the removed items
+	public void removeGrocery(Grocery grocery)
 	{
-		try(PreparedStatement insert = connection.prepareStatement(INSERT_ROW);)
+		try
 		{
-			insert.setString(1, grocery);
-			insert.execute();
+			// perform deletion from list
+			PreparedStatement purchase = connection.prepareStatement(DELETE_ROW);
+			purchase.setString(1, grocery.item_name());
+			purchase.execute();
+			// update the store with the items placed back into the store
+			PreparedStatement updateStore = connection.prepareStatement(MOVE_ITEM_TO_STORE);
+			updateStore.setInt(1, grocery.quantity());
+			updateStore.setString(2, grocery.item_name());
+			updateStore.execute();
 		}
 		catch(SQLException e) { e.printStackTrace(); }
 	}
 	
-	// deletes row consisting of specified grocery item
-	public void deleteGrocery(String grocery)
-	{ 
-		try(PreparedStatement delete = connection.prepareStatement(DELETE_ROW);)
-		{
-			delete.setString(1, grocery);
-			delete.execute();
-		}
-		catch(SQLException e) { e.printStackTrace(); }
-	}
-	
-	// updates an item in the grocery 
-	public void updateGrocery(Grocery groceryData)
+	// purchases the specified grocery from the grocery list
+	// same as removeGrocery above except does not reclaim items to store
+	public void purchaseGrocery(Grocery grocery)
 	{
-		try(PreparedStatement update = connection.prepareStatement(UPDATE_ROW))
+		try
 		{
-			// set based on data type (only place requiring hardcoding)
-			update.setFloat(1, groceryData.price());
-			update.setInt(2, groceryData.quantity());
-			update.setBoolean(3, groceryData.on_sale());
-			update.setString(4, groceryData.item_name());
-			update.execute();
+			// perform deletion from list
+			PreparedStatement purchase = connection.prepareStatement(DELETE_ROW);
+			purchase.setString(1, grocery.item_name());
+			purchase.execute();
 		}
 		catch(SQLException e) { e.printStackTrace(); }
 	}

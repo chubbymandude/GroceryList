@@ -1,10 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 body
 {
-    background-color: rgb(255, 255, 221);
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, rgb(255, 212, 104), #fdd43e);
     position: relative;
     display: grid;
     place-items: center;
-    justify-content: center;
     display: flex;
 }

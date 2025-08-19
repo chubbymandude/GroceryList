@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { setThrowInvalidWriteToSignalError } from '@angular/core/primitives/signals';
 import { Observable } from 'rxjs';
 
 // consists of the JSON body for a grocery item and its attributes
@@ -17,29 +18,30 @@ export interface Grocery
 // used to obtain data from Java backend in a global component
 export class GroceryAPI 
 {
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) {};
 
-    // obtains all groceries and attributes in the form of a 2D array
-    getGroceries() : Observable<Grocery[]>
+    getStore() : Observable<Grocery[]>
     {
-        return this.http.get<Grocery[]>('http://localhost:8080/get-all');
+        return this.http.get<Grocery[]>('http://localhost:8080/store/display');
     }
 
-    // sends name of grocery item to be added to database
-    addGrocery(itemName : string) : Observable<Object>
+    addToList(grocery: Grocery) : Observable<Grocery>
     {
-        return this.http.post('http://localhost:8080/add-grocery', itemName);
+        return this.http.put<Grocery>('http://localhost:8080/store/add', grocery);
     }
 
-    // sends name of grocery item to be deleted from database
-    deleteGrocery(itemName : string) : Observable<Object>
+    getList() : Observable<Grocery[]>
     {
-        return this.http.post('http://localhost:8080/delete-grocery', itemName);
+        return this.http.get<Grocery[]>('http://localhost:8080/list/display');
     }
 
-    // updates the entire row of this grocery item when the update button is clicked
-    updateGrocery(row : Grocery) : Observable<Grocery>
+    removeGrocery(grocery: Grocery) : Observable<Grocery>
     {
-        return this.http.post<Grocery>('http://localhost:8080/update-grocery', row);
+        return this.http.delete<Grocery>('http://localhost:8080/list/remove', { body: grocery })
+    }
+
+    purchaseGrocery(grocery : Grocery) : Observable<Grocery>
+    {
+        return this.http.delete<Grocery>('http://localhost:8080/list/purchase', { body: grocery });
     }
 }

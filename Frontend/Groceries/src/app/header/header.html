@@ -1,7 +1,9 @@
-<!-- header which consists of an image of a shopping and some intro text -->
 <div class = "header-div">
-    <img class = "shopping-cart-image" 
-        src = "https://images.vexels.com/media/users/3/141186/isolated/svg/431ad815c9a8402ebdf354c82923c2a5.svg"
-        alt = "Shopping Cart">
-    <p class = "header-text">Your Grocery List</p>
+    <p class = "header-text">Welcome to the Store!</p>
+    <div class = "buttons-div">
+        <button routerLink = "/" class = "header-button">The Store</button>
+        <button routerLink = "/list" routerLinkActive = "active" class = "header-button">Your Grocery List</button>
+        <button class = "header-button">About</button> <!-- just for display purpose -->
+        <button class = "header-button">Contact</button> <!-- just for display purpose -->
+    </div>
 </div>

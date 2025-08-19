@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Header } from './header/header';
-import { Table } from './table/table';
 
 @Component(
 {
     selector: 'app-root',
-    imports: [RouterOutlet, Header, Table],
+    imports: [RouterOutlet, Header],
     template: `
         <app-header/>
-        <app-table/>
         <router-outlet/>
     `,
     styleUrl: './app.scss'
